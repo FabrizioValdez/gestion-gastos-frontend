@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/',
+  baseURL: import.meta.env.VITE_API_URL, // ← lee del .env
   headers: {
     'Content-Type': 'application/json'
   }
@@ -27,22 +27,22 @@ api.interceptors.response.use(
 
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
-      
+
       try {
         const refreshToken = localStorage.getItem('refresh_token')
         if (!refreshToken) throw new Error('No refresh token')
-        
+
         // Hacemos un llamado puro a axios (sin usar la instancia "api") para evitar bucles infinitos
-        const response = await axios.post('http://localhost:8000/api/auth/token/refresh/', {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}auth/token/refresh/`, {
           refresh: refreshToken
         })
-        
+
         const access = response.data.access || response.data.access_token || response.data.tokens?.access
         if (access) {
-            localStorage.setItem('access_token', access)
-            originalRequest.headers.Authorization = `Bearer ${access}`
+          localStorage.setItem('access_token', access)
+          originalRequest.headers.Authorization = `Bearer ${access}`
         }
-        
+
         return api(originalRequest)
       } catch (refreshError) {
         // Fallo la renovación del token (e.g. refresh token expiró)
@@ -53,7 +53,7 @@ api.interceptors.response.use(
         return Promise.reject(refreshError)
       }
     }
-    
+
     return Promise.reject(error)
   }
 )
