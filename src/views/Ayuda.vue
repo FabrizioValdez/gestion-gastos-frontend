@@ -1,18 +1,16 @@
 <template>
   <div>
-    <div class="sm:flex sm:items-center sm:justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Centro de Ayuda</h2>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Preguntas frecuentes y soporte</p>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Preguntas frecuentes</p>
       </div>
-      <div class="mt-4 sm:mt-0">
-        <select v-model="categoriaFiltro" @change="cargarAyuda" class="input-field py-2 px-3">
-          <option value="">Todas las categorías</option>
-          <option value="pagos">Pagos</option>
-          <option value="servicios">Servicios</option>
-          <option value="cuenta">Cuenta</option>
-        </select>
-      </div>
+      <select v-model="categoriaFiltro" @change="cargarAyuda" class="input-field py-2 px-3 w-full sm:w-auto">
+        <option value="">Todas</option>
+        <option value="pagos">Pagos</option>
+        <option value="servicios">Servicios</option>
+        <option value="cuenta">Cuenta</option>
+      </select>
     </div>
 
     <!-- Loading State -->

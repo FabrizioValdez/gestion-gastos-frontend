@@ -49,26 +49,53 @@
       </div>
     </div>
 
-    <!-- Mobile menu... (Se omitió por brevedad para añadir después en iteración de responsive) -->
+    <!-- Mobile Menu -->
+    <MobileMenu :isOpen="isMobileMenuOpen" @close="isMobileMenuOpen = false" />
 
     <!-- Main Column -->
     <div class="flex flex-col w-full flex-1 overflow-hidden">
-      <!-- Navbar superior (Mobile Header / Global Controls) -->
+      <!-- Navbar superior -->
       <header class="h-16 shrink-0 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        <h2 class="text-xl font-medium text-gray-800 dark:text-white sm:hidden">App</h2>
+        <!-- Mobile Logo & Hamburger -->
+        <div class="flex items-center space-x-3">
+          <button 
+            @click="isMobileMenuOpen = true"
+            class="md:hidden p-2 -ml-2 rounded-lg text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Bars3Icon class="h-6 w-6" />
+          </button>
+          <span class="md:hidden text-lg font-semibold text-gray-800 dark:text-white">
+            {{ currentPageTitle }}
+          </span>
+          <span class="hidden md:block text-xl font-medium text-gray-800 dark:text-white">
+            {{ currentPageTitle }}
+          </span>
+        </div>
         
         <!-- Controls derecho -->
-        <div class="flex items-center space-x-4 ml-auto">
-           <button @click="toggleTheme" class="p-2 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none">
-             <SunIcon v-if="isDark" class="h-6 w-6" />
-             <MoonIcon v-else class="h-6 w-6" />
-           </button>
+        <div class="flex items-center space-x-2 sm:space-x-4">
+          <!-- Mobile notification badge -->
+          <router-link 
+            v-if="notificacionesPendientes > 0"
+            to="/notificaciones"
+            class="md:hidden relative p-2 rounded-lg text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <BellAlertIcon class="h-6 w-6" />
+            <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+              {{ notificacionesPendientes > 9 ? '9+' : notificacionesPendientes }}
+            </span>
+          </router-link>
+
+          <button @click="toggleTheme" class="p-2 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <SunIcon v-if="isDark" class="h-6 w-6" />
+            <MoonIcon v-else class="h-6 w-6" />
+          </button>
         </div>
       </header>
 
       <!-- Contenido Principal Dinámico -->
       <main class="flex-1 relative z-0 overflow-y-auto focus:outline-none bg-gray-50 dark:bg-gray-900">
-        <div class="py-6 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
+        <div class="py-4 sm:py-6 px-3 sm:px-6 md:px-8 max-w-7xl mx-auto">
           <router-view />
         </div>
       </main>
@@ -81,6 +108,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useServiciosStore } from '../stores/servicios'
+import MobileMenu from './MobileMenu.vue'
 import { 
   HomeIcon, 
   RectangleStackIcon, 
@@ -91,13 +119,16 @@ import {
   ArrowRightOnRectangleIcon,
   SunIcon,
   MoonIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  Bars3Icon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const serviciosStore = useServiciosStore()
+
+const isMobileMenuOpen = ref(false)
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -108,6 +139,24 @@ const navigation = [
   { name: 'Notificaciones', href: '/notificaciones', icon: BellAlertIcon },
   { name: 'Ayuda', href: '/ayuda', icon: QuestionMarkCircleIcon },
 ]
+
+const pageTitles = {
+  '/dashboard': 'Dashboard',
+  '/deudas': 'Deudas',
+  '/servicios': 'Servicios',
+  '/pagos': 'Pagos',
+  '/graficos': 'Gráficos',
+  '/notificaciones': 'Notificaciones',
+  '/ayuda': 'Ayuda',
+}
+
+const currentPageTitle = computed(() => {
+  const path = route.path
+  for (const [key, value] of Object.entries(pageTitles)) {
+    if (path.startsWith(key)) return value
+  }
+  return 'Gestión de Gastos'
+})
 
 const notificacionesPendientes = computed(() => serviciosStore.notificacionesPendientes)
 const deudasPendientes = computed(() => serviciosStore.cantidadDeudas)
